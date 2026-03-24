@@ -576,6 +576,117 @@ Because this expands to many hand classes, a full `1000`-sample run can take man
 python3 -u run_edge_family_sampling.py --limit-hands 2 --samples 20 --sample-jobs 8 --output-dir edge_family_sampling_smoke
 ```
 
+## Published 84-Hand Run
+
+This repo now includes one completed `1000`-sample family run for the hand set above under:
+
+- `results/edge_family_sampling_84x1000/summary.csv`
+- `results/edge_family_sampling_84x1000/switch_gain_dollars.csv`
+
+The helper script:
+
+```bash
+python3 summarize_switch_gain_dollars.py
+```
+
+computes the cleaner "dead-card switching" value:
+
+`switch_gain = avg_best_ev - max(avg_ev_4x, avg_ev_check)`
+
+and then converts that to dollars using:
+
+`dollar_contribution = switch_gain * hand_weight * ante`
+
+For the published run:
+
+- samples per hand class: `1000`
+- ante used for the dollar conversion: `$1000`
+- covered hand classes: `84`
+- covered combos: `664 / 1326`
+- total weighted EV gain for this subset: `0.010437276867`
+- total dollar value for this subset: `$10.437276867`
+
+Top hands by `switch_gain` in the published run:
+
+- `J8s`: `0.079304`
+- `T9s`: `0.076637`
+- `Q8o`: `0.071027`
+- `Q6s`: `0.069945`
+- `K2s`: `0.068102`
+- `J9o`: `0.067926`
+- `JTo`: `0.061709`
+- `Q5s`: `0.060373`
+- `33`: `0.057957`
+- `K5o`: `0.055294`
+
+Top hands by weighted dollar contribution for this subset:
+
+- `Q8o`: `$0.642776`
+- `J9o`: `$0.614711`
+- `JTo`: `$0.558451`
+- `K5o`: `$0.500394`
+- `K4o`: `$0.495050`
+- `Q7o`: `$0.438450`
+- `Q9o`: `$0.399505`
+- `K3o`: `$0.338675`
+- `K6o`: `$0.335751`
+- `J8o`: `$0.319147`
+
+Family totals in the published run:
+
+- `Qx`: `$3.333306`
+- `Kx`: `$3.051030`
+- `Jx`: `$2.363328`
+- `Tx explicit (T8/T9)`: `$0.720004`
+- `Ax`: `$0.487609`
+- `22`-`55`: `$0.482000`
+
+## Rare-Action Examples
+
+The tables below answer a practical question:
+
+- if one action was best in fewer than `5%` of the `1000` sampled exposed-card states,
+- what is one concrete `10`-dead-card example that still made that rare action best?
+
+These are not strategy rules by themselves. They are examples from the published run that show what the rare action looked like when it actually happened.
+
+### Rare Checks (`check% < 5%`)
+
+| Hand | Rare action rate | Example exposed cards | EV(4x) | EV(check) | Check gain |
+| --- | ---: | --- | ---: | ---: | ---: |
+| `55` | `3.5%` | `2d 3h 4d 4s 5h 5s 8c 9s Qd Ad` | `-0.888511` | `-0.641757` | `0.246754` |
+| `A3s` | `3.8%` | `3h 5c 5d 6c 8h Tc Js Ad Ah As` | `-0.849626` | `-0.604302` | `0.245323` |
+| `A4s` | `2.6%` | `3s 4h 4s 5c 8c Jc Qc Ks Ah As` | `-0.737621` | `-0.519789` | `0.217832` |
+| `A5o` | `4.3%` | `4c 4d 4h 4s 5c 5h 6s 9d Qd Ah` | `-0.737146` | `-0.472679` | `0.264468` |
+| `A5s` | `1.6%` | `2h 3d 5h 5s 6d 9c Jc Ad Ah As` | `-0.694848` | `-0.471212` | `0.223635` |
+| `A6o` | `2.5%` | `2d 2h 3d 3s 4s 6c 6h 9d Ad As` | `-0.755005` | `-0.537744` | `0.217261` |
+| `A6s` | `0.7%` | `2c 2d 2h 3c 4d 6s 9c 9s Ad As` | `-0.362791` | `-0.307861` | `0.054929` |
+| `A7o` | `1.7%` | `5c 5s 7c 7h 8c Ts Jd Ad Ah As` | `-1.096235` | `-0.750827` | `0.345408` |
+| `A7s` | `0.3%` | `3c 3h 6s 7s 8c Js Qc Ad Ah As` | `-0.567041` | `-0.457705` | `0.109336` |
+| `A8o` | `1.3%` | `2h 3c 5c 7c 8h 8s Jc Ad Ah As` | `-1.015827` | `-0.718860` | `0.296966` |
+| `A8s` | `0.2%` | `3d 3h 8h 8s Jc Kd Ks Ad Ah As` | `-0.438557` | `-0.339709` | `0.098848` |
+| `A9o` | `1.5%` | `4c 7s 9c 9h 9s Th Jd Qc Ah As` | `-0.861406` | `-0.609455` | `0.251951` |
+| `A9s` | `0.2%` | `4d 8c 9d 9h 9s Qc Qd Ks Ah As` | `-0.543724` | `-0.391703` | `0.152021` |
+| `K9s` | `3.5%` | `2s 8c 9d 9s Qc Kd Kh Ks Ad As` | `-1.003415` | `-0.589325` | `0.414090` |
+| `KTo` | `3.9%` | `2h 3h 6d 9c Tc Ts Jc Jh Kd Kh` | `-0.941291` | `-0.569924` | `0.371367` |
+| `KTs` | `1.8%` | `2c 5h 6s Td Th Ts Jd Qc Kd Ks` | `-0.929695` | `-0.521472` | `0.408223` |
+| `KJo` | `3.6%` | `2s 6h 9c 9s Th Jc Jh Js Qh Kd` | `-0.847724` | `-0.498468` | `0.349257` |
+| `KJs` | `1.9%` | `5c 5d 6d 8c Th Jd Js Qc Kd Kh` | `-0.591773` | `-0.376422` | `0.215351` |
+| `KQo` | `4.0%` | `3h 3s 7d Td Qc Qh Kd Kh Ks Ad` | `-1.374689` | `-0.767015` | `0.607674` |
+| `KQs` | `1.3%` | `3c 4h 9c 9h Ts Js Qh Qs Kh Ks` | `-0.136185` | `0.132622` | `0.268807` |
+
+### Rare 4x (`4x% < 5%`)
+
+| Hand | Rare action rate | Example exposed cards | EV(4x) | EV(check) | 4x gain |
+| --- | ---: | --- | ---: | ---: | ---: |
+| `J2o` | `0.0%` | No `4x` sample appeared in the `1000` exposed-card draws. | — | — | — |
+| `J2s` | `3.0%` | `5h 5s 7s 8d 9d Td Qs Kd Kh Ah` | `0.445893` | `0.312902` | `0.132991` |
+| `J3o` | `0.0%` | No `4x` sample appeared in the `1000` exposed-card draws. | — | — | — |
+| `J3s` | `4.9%` | `2d 4s 6s 7h 8d Td Ts Qh Ad As` | `0.447512` | `0.311057` | `0.136455` |
+| `J4o` | `0.2%` | `5h 6s 9d Th Qs Kd Kh Ks Ad Ah` | `0.075700` | `0.050738` | `0.024962` |
+| `J5o` | `1.6%` | `6h 8c 8d 9s Tc Qh Qs Kh Ks Ac` | `0.110666` | `0.038864` | `0.071802` |
+| `Q2o` | `1.0%` | `3s 5h 6h 7s 8d 8h 9h Ks Ac Ad` | `-0.020497` | `-0.054733` | `0.034236` |
+
 ## Notes
 
 - The exact solver is in C. Python is only used for random sampling, parallel process orchestration, and summary stats.

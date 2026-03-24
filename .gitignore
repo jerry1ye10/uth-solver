@@ -5,3 +5,4 @@ uth_exact_solver
 *.o
 
 *.csv
+!results/**/*.csv
