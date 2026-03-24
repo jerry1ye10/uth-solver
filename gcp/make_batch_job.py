@@ -106,7 +106,7 @@ def parse_args() -> argparse.Namespace:
 def build_inline_script() -> str:
     return "\n".join(
         [
-            "set -euo pipefail",
+            "set -eu",
             "export DEBIAN_FRONTEND=noninteractive",
             "apt-get update",
             "apt-get install -y --no-install-recommends build-essential ca-certificates git python3 python3-pip",
