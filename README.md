@@ -352,6 +352,79 @@ python3 -u sample_random_exposed_ev.py --hero 3c 3d --samples 1000 --jobs 8 --se
 5. Weight each hand-class gain by its preflop probability.
 6. Sum those weighted gains to estimate the total value of the exposed-card strategy.
 
+## Run A Whole Family Of Edge Hands
+
+This repo also includes a higher-level batch runner:
+
+- `run_edge_family_sampling.py`
+
+It expands and runs the following canonical hand classes:
+
+- pairs: `22` through `55`
+- `A2s` through `A9s`
+- `A2o` through `A9o`
+- all `Kx` suited and offsuit classes below `AK`
+- all `Qx` suited and offsuit classes below `QK`
+- all `Jx` suited and offsuit classes below `JQ`
+- `T8s`, `T9s`, `T8o`, `T9o`
+
+The runner uses one canonical representative per hand class, for example:
+
+- `A2s` -> `Ac 2c`
+- `A2o` -> `Ac 2d`
+- `33` -> `3c 3d`
+
+This is enough for class-level averaging because the batch job is working at the suited / offsuit / pair class level, not at the raw 1326-combo level.
+
+Example:
+
+```bash
+python3 -u run_edge_family_sampling.py \
+  --samples 1000 \
+  --sample-jobs 8 \
+  --seed 0 \
+  --default-baseline 4x \
+  --output-dir edge_family_sampling_out
+```
+
+Outputs:
+
+- `edge_family_sampling_out/hand_manifest.csv`
+  - hand classes, canonical hero cards, baselines, weights
+- `edge_family_sampling_out/per_hand/*.csv`
+  - full per-sample results for each hand class
+- `edge_family_sampling_out/summary.csv`
+  - one summary row per hand class
+
+Summary columns include:
+
+- average `EV(4x)`
+- average `EV(check)`
+- average gain versus baseline
+- 1-sigma and 95% confidence estimates for gain
+- weighted gain contribution to the full strategy
+
+If you want to override the baseline action for specific labels, provide a CSV like:
+
+```csv
+label,baseline
+K2o,check
+Q6o,check
+J8o,check
+```
+
+and run:
+
+```bash
+python3 -u run_edge_family_sampling.py --baseline-map baseline_overrides.csv
+```
+
+Because this expands to many hand classes, a full `1000`-sample run can take many hours. A small smoke test is:
+
+```bash
+python3 -u run_edge_family_sampling.py --limit-hands 2 --samples 20 --sample-jobs 8 --output-dir edge_family_sampling_smoke
+```
+
 ## Notes
 
 - The exact solver is in C. Python is only used for random sampling, parallel process orchestration, and summary stats.
