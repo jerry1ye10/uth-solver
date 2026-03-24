@@ -109,7 +109,11 @@ def build_inline_script() -> str:
             "set -eu",
             "export DEBIAN_FRONTEND=noninteractive",
             "apt-get update",
-            "apt-get install -y --no-install-recommends build-essential ca-certificates git python3 python3-pip",
+            (
+                "apt-get install -y --no-install-recommends "
+                "build-essential gcc g++ cpp libc6-dev make ca-certificates git python3 python3-pip"
+            ),
+            "gcc --version",
             "rm -rf /tmp/uth-solver",
             "mkdir -p /tmp/uth-solver",
             'echo "Cloning ${REPO_URL}@${REPO_REF}"',
