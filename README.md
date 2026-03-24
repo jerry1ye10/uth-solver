@@ -212,6 +212,112 @@ Then total strategy gain is:
 
 `TotalGain = sum_h P(h) * Gain(h)`
 
+## How To Solve The Full Edge Gain From 10 Dead Cards
+
+If the real goal is not just one hand like `33`, but the full-game edge from being able to see 10 dead cards before the preflop decision, the problem can be framed as:
+
+`FullEdgeGain = sum_h P(h) * E_D[ BestEV(h, D) - BaselineEV(h, D) ]`
+
+where:
+
+- `h` is a starting-hand class
+- `P(h)` is the preflop probability of that class
+- `D` is a random 10-card exposed/dead set drawn from the remaining deck
+
+### Hand-Class Weights
+
+For preflop class weighting:
+
+- pocket pair class: `6 / 1326`
+- suited non-pair class: `4 / 1326`
+- offsuit non-pair class: `12 / 1326`
+
+So if `Gain(33)` is the average value of exposed-card information for pocket 3s, then its contribution to the full-game edge is:
+
+`(6 / 1326) * Gain(33)`
+
+### Exact In Principle vs Practical In Practice
+
+For one fixed hero hand and one fixed exposed-card set, this repo computes the EV exactly.
+
+For the full "10 dead cards" edge, there are two conceptual layers:
+
+1. Inner solve:
+   - exact
+   - for a fixed hero hand and fixed exposed cards, the solver enumerates every legal future world
+2. Outer exposed-card average:
+   - either exact or sampled
+   - exact would mean averaging over all possible 10-card exposed sets for that hero hand
+
+That exact outer average is usually too large to be practical. For a fixed 2-card hero hand, the number of possible exposed-10 sets is:
+
+`C(50, 10)`
+
+which is enormous. So the practical approach is:
+
+- sample many random exposed-card states for a hand class
+- estimate `Gain(h)` from those samples
+- repeat for the hand classes you care about
+- weight and sum the per-class gains
+
+### Practical Workflow For Full Edge Gain
+
+1. Choose a baseline policy.
+   - Example: for `33`, blind preflop baseline is often `4x`
+2. For each candidate hand class `h`, run the sampler:
+
+```bash
+python3 -u sample_random_exposed_ev.py --hero 3c 3d --samples 1000 --jobs 8 --seed 0 --baseline 4x --csv pocket_3s_random10_1000.csv
+```
+
+3. Compute the average sampled gain:
+
+`GainHat(h) = average(BestEV - BaselineEV)`
+
+4. Weight it by hand frequency:
+
+`ContributionHat(h) = P(h) * GainHat(h)`
+
+5. Sum contributions across all modeled hand classes:
+
+`FullEdgeGainHat = sum_h ContributionHat(h)`
+
+### Confidence / Error Bars For The Full Edge
+
+For one hand class `h`, let:
+
+- `s_h` = sample standard deviation of `BestEV - BaselineEV`
+- `n_h` = number of exposed-card samples
+- `SE_h = s_h / sqrt(n_h)`
+
+Then the standard error of the weighted contribution is:
+
+`WeightedSE_h = P(h) * SE_h`
+
+If the sampled hand-class estimates are generated independently, then a simple approximation for the total standard error is:
+
+`FullSE = sqrt(sum_h WeightedSE_h^2)`
+
+and a rough 95% confidence interval is:
+
+`FullEdgeGainHat ± 1.96 * FullSE`
+
+### What This Repo Currently Supports
+
+This repo already supports:
+
+- exact EV for one fixed hero hand plus one fixed exposed-10 state
+- batch sampling over many random exposed-10 states for one hero hand
+- CSV output that can be aggregated outside the solver
+
+It does not yet automate:
+
+- running every starting-hand class end-to-end
+- choosing a baseline action per class automatically
+- combining all classes into one final full-game estimate
+
+But the pieces are already here to do that aggregation cleanly.
+
 ## Statistical Interpretation Of The Batch Sampler
 
 The C solve is exact for each fixed exposed-card state.
