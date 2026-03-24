@@ -387,6 +387,157 @@ python3 -u run_edge_family_sampling.py \
   --output-dir edge_family_sampling_out
 ```
 
+The current family list contains `84` hand classes total.
+
+### Split Work Across Multiple Machines
+
+The family runner can shard the hand-class list across multiple boxes:
+
+```bash
+python3 -u run_edge_family_sampling.py \
+  --samples 1000 \
+  --sample-jobs 4 \
+  --seed 0 \
+  --default-baseline 4x \
+  --shard-count 4 \
+  --shard-index 0 \
+  --output-dir edge_family_sampling_shard0
+```
+
+Run the same command on each machine, changing only `--shard-index`:
+
+- box 1: `--shard-index 0`
+- box 2: `--shard-index 1`
+- box 3: `--shard-index 2`
+- box 4: `--shard-index 3`
+
+This is the cleanest way to use multiple compute boxes:
+
+- each box gets a disjoint subset of hand classes
+- no exposed-card samples are duplicated across boxes
+- each box writes its own `summary.csv` and `per_hand/*.csv`
+
+For GitHub Actions or other smaller Linux VMs, a good starting point is:
+
+- `--sample-jobs 4`
+- `--shard-count 8` to `12`
+
+That keeps each shard comfortably under typical hosted-runner time limits while still parallelizing the full batch.
+
+## Run The Full Family On GCP Batch
+
+This repo includes helper scripts under `gcp/` for the cleanest cloud setup:
+
+- one Google Cloud Batch task per hand class
+- `84` tasks total
+- each task runs exactly one shard
+- each task uploads its `summary.csv` and `per_hand/*.csv` files to Cloud Storage
+
+Files:
+
+- `gcp/make_batch_job.py`
+  - generates a Batch job config JSON
+- `gcp/batch_task_entrypoint.sh`
+  - bootstraps a VM, compiles the solver, and runs one shard
+- `gcp/upload_dir_to_gcs.py`
+  - uploads one shard's output directory to GCS
+- `gcp/merge_shard_summaries.py`
+  - merges downloaded shard summaries into one combined estimate
+
+### Credential / Project Checklist
+
+You need:
+
+- a GCP project ID
+- a region, for example `us-central1`
+- a Cloud Storage bucket for outputs
+- local submit credentials
+- a VM service account that can write to that bucket
+
+Local submit credentials can be either:
+
+- `gcloud auth login`
+- or a service-account key JSON activated with:
+  - `gcloud auth activate-service-account --key-file /path/to/key.json`
+
+The submit identity should be able to:
+
+- submit Batch jobs
+- use the chosen VM service account
+- read/write the output bucket if you also want to inspect or download results locally
+
+The VM service account attached to the Batch job should be able to:
+
+- write objects to the chosen Cloud Storage bucket
+- write logs normally through Batch / Compute Engine defaults
+
+### Generate A Batch Job Config
+
+Example:
+
+```bash
+python3 gcp/make_batch_job.py \
+  --job-name uth-edge-20260323 \
+  --region us-central1 \
+  --bucket YOUR_BUCKET_NAME \
+  --samples 1000 \
+  --sample-jobs 2 \
+  --parallelism 24 \
+  --machine-type e2-standard-2 \
+  --spot \
+  --service-account-email YOUR_VM_SERVICE_ACCOUNT@YOUR_PROJECT.iam.gserviceaccount.com
+```
+
+That writes `gcp/batch-job.json` and prints the `gcloud batch jobs submit ...` command.
+
+Recommended starting point:
+
+- `task-count = 84`
+- `sample-jobs = 2`
+- `machine-type = e2-standard-2`
+- `parallelism = 24`
+- `--spot` if you want cheaper but interruptible compute
+
+### Submit The Batch Job
+
+```bash
+gcloud batch jobs submit uth-edge-20260323 \
+  --location us-central1 \
+  --config gcp/batch-job.json
+```
+
+Each task will:
+
+- clone the public repo
+- compile `uth_exact_solver.c`
+- run exactly one hand-class shard
+- upload results to:
+  - `gs://YOUR_BUCKET_NAME/uth-edge-family/uth-edge-20260323/shard_<task_index>/`
+
+### Collect And Merge Results
+
+Download the outputs locally:
+
+```bash
+gcloud storage cp --recursive \
+  gs://YOUR_BUCKET_NAME/uth-edge-family/uth-edge-20260323 \
+  ./gcp-results
+```
+
+Merge the shard summaries:
+
+```bash
+python3 gcp/merge_shard_summaries.py \
+  --input-root ./gcp-results/uth-edge-20260323 \
+  --output ./gcp-results/merged-summary.csv
+```
+
+That prints:
+
+- total weighted gain
+- total weighted 1-sigma
+- total weighted 95% confidence interval
+
 Outputs:
 
 - `edge_family_sampling_out/hand_manifest.csv`

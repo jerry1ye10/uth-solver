@@ -104,6 +104,24 @@ def parse_args() -> argparse.Namespace:
         help="Optional limit for smoke testing only the first N hand classes.",
     )
     parser.add_argument(
+        "--shard-count",
+        type=int,
+        default=1,
+        help=(
+            "Split the hand-class list into this many shards. "
+            "Use with --shard-index on multiple boxes."
+        ),
+    )
+    parser.add_argument(
+        "--shard-index",
+        type=int,
+        default=0,
+        help=(
+            "Zero-based shard index to run from the hand-class list. "
+            "Must satisfy 0 <= shard-index < shard-count."
+        ),
+    )
+    parser.add_argument(
         "--quiet-samples",
         action="store_true",
         help="If set, suppress per-sample lines and only print per-hand summaries.",
@@ -436,6 +454,16 @@ def main() -> int:
     specs = apply_baseline_overrides(specs, read_baseline_overrides(args.baseline_map))
     if args.limit_hands is not None:
         specs = specs[: args.limit_hands]
+    if args.shard_count <= 0:
+        raise ValueError("--shard-count must be positive")
+    if args.shard_index < 0 or args.shard_index >= args.shard_count:
+        raise ValueError("--shard-index must satisfy 0 <= shard-index < shard-count")
+    if args.shard_count > 1:
+        specs = [
+            spec
+            for index, spec in enumerate(specs)
+            if index % args.shard_count == args.shard_index
+        ]
 
     output_dir = Path(args.output_dir)
     per_hand_dir = output_dir / "per_hand"
@@ -465,6 +493,8 @@ def main() -> int:
     print(f"Manifest: {manifest_path}")
     if args.limit_hands is not None:
         print(f"Limit applied: first {args.limit_hands} hand classes only")
+    if args.shard_count > 1:
+        print(f"Shard: {args.shard_index + 1}/{args.shard_count}")
 
     overall_start = time.time()
     summary_rows: List[dict] = []
