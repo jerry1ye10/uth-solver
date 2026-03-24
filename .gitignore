@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+uth_exact_solver
+*.o
+
+*.csv
