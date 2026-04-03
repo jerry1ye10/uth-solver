@@ -21,6 +21,8 @@ This repo is aimed at questions like:
   Batch runner that samples many random exposed-card sets and calls the C solver for each one.
 - `analyze_dead_out_thresholds.py`
   Post-processes the published per-hand sample CSVs into "how many dead-card outs make `check` beat `4x`?" tables.
+- `generate_outs_examples_md.py`
+  Builds a richer markdown examples page with `T9`, suited `Qx`, and representative `3`-out / `4`-out sample states.
 
 ## What The Solver Computes
 
@@ -666,10 +668,18 @@ builds two published tables:
 - `results/edge_family_sampling_84x1000/outs_threshold_summary.csv`
 - `results/edge_family_sampling_84x1000/outs_bucket_summary.csv`
 - `results/edge_family_sampling_84x1000/outs_threshold_summary.md`
+- `results/edge_family_sampling_84x1000/outs_examples.md`
+
+For the richer examples page, run:
+
+```bash
+python3 generate_outs_examples_md.py
+```
 
 If you want the full hand-by-hand table rendered directly on GitHub instead of opening the CSVs, use:
 
 - `results/edge_family_sampling_84x1000/outs_threshold_summary.md`
+- `results/edge_family_sampling_84x1000/outs_examples.md`
 
 ### How To Read The Tables
 
