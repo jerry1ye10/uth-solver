@@ -76,6 +76,13 @@ def representative_sample(
     return row
 
 
+def bucket_row(label: str, outs: int, bucket_rows: dict[str, list[dict[str, str]]]) -> dict[str, str] | None:
+    for row in bucket_rows[label]:
+        if int(row["outs"]) == outs:
+            return row
+    return None
+
+
 def main() -> int:
     summary_rows = {row["label"]: row for row in load_csv(SUMMARY)}
     threshold_rows = {row["label"]: row for row in load_csv(THRESHOLDS)}
@@ -136,6 +143,56 @@ def main() -> int:
                 "Representative threshold sample",
                 "Sample EV(4x)",
                 "Sample EV(check)",
+            ],
+            rows,
+        )
+
+        handle.write("## Borderline Broadway: One Less Out vs Threshold Out\n\n")
+        handle.write(
+            "These are the broadway-heavy hands that look most like practical border cases. "
+            "For each hand, the table shows the exact bucket where average `EV(check)` first beats average `EV(4x)`, "
+            "plus the immediately lower outs bucket for comparison.\n\n"
+        )
+        rows = []
+        for label in ["KTo", "KTs", "KJo", "KJs", "KQo", "KQs", "QTo", "QTs", "QJo", "QJs", "JTo", "JTs", "T9o", "T9s"]:
+            summary = summary_rows[label]
+            threshold = threshold_rows[label]
+            exact_threshold = threshold["first_exact_outs_where_avg_check_exceeds_4x"] or "none"
+            if exact_threshold == "none":
+                continue
+            exact_outs = int(exact_threshold)
+            prev_outs = exact_outs - 1
+            prev_bucket = bucket_row(label, prev_outs, bucket_summary)
+            exact_bucket = bucket_row(label, exact_outs, bucket_summary)
+            prev_sample = representative_sample(label, summary["hero"], prev_outs, bucket_summary[label], preferred_action="4x")
+            exact_sample = representative_sample(label, summary["hero"], exact_outs, bucket_summary[label], preferred_action="check")
+            rows.append(
+                [
+                    f"`{label}`",
+                    fmt_rate(summary["check_better_rate"]),
+                    str(prev_outs),
+                    "—" if prev_bucket is None else fmt_num(prev_bucket["avg_ev_4x"]),
+                    "—" if prev_bucket is None else fmt_num(prev_bucket["avg_ev_check"]),
+                    str(exact_outs),
+                    "—" if exact_bucket is None else fmt_num(exact_bucket["avg_ev_4x"]),
+                    "—" if exact_bucket is None else fmt_num(exact_bucket["avg_ev_check"]),
+                    "—" if prev_sample is None else f"`{prev_sample['exposed']}`",
+                    "—" if exact_sample is None else f"`{exact_sample['exposed']}`",
+                ]
+            )
+        write_table(
+            handle,
+            [
+                "Hand",
+                "Check%",
+                "One less out",
+                "Avg EV(4x) there",
+                "Avg EV(check) there",
+                "Threshold out",
+                "Avg EV(4x) at threshold",
+                "Avg EV(check) at threshold",
+                "Representative one-less-out sample",
+                "Representative threshold sample",
             ],
             rows,
         )

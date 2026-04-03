@@ -22,7 +22,7 @@ This repo is aimed at questions like:
 - `analyze_dead_out_thresholds.py`
   Post-processes the published per-hand sample CSVs into "how many dead-card outs make `check` beat `4x`?" tables.
 - `generate_outs_examples_md.py`
-  Builds a richer markdown examples page with `T9`, suited `Qx`, and representative `3`-out / `4`-out sample states.
+  Builds a richer markdown examples page with `T9`, suited `Qx`, borderline broadway comparisons, and representative `3`-out / `4`-out sample states.
 
 ## What The Solver Computes
 

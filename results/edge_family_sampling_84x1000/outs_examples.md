@@ -13,6 +13,27 @@ An **out** here means an exposed/dead card whose rank matches either hero rank. 
 | `T9o` | 72.1% | -0.223949 | -0.069562 | 1 | 0 | `2s 3s 5d 7c 7d 8h 9c Jh Ks Ah` | -0.113282 | -0.019147 |
 | `T9s` | 50.4% | 0.180101 | 0.211384 | 2 | 0 | `2d 2s 4c 4d 5s 7d 7s Td Th Js` | 0.000030 | 0.191896 |
 
+## Borderline Broadway: One Less Out vs Threshold Out
+
+These are the broadway-heavy hands that look most like practical border cases. For each hand, the table shows the exact bucket where average `EV(check)` first beats average `EV(4x)`, plus the immediately lower outs bucket for comparison.
+
+| Hand | Check% | One less out | Avg EV(4x) there | Avg EV(check) there | Threshold out | Avg EV(4x) at threshold | Avg EV(check) at threshold | Representative one-less-out sample | Representative threshold sample |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `KTo` | 3.9% | 3 | -0.158908 | -0.160701 | 4 | -0.675259 | -0.425675 | `2c 3c 6s 9h Tc Ts Jh Qc Kh As` | `3s 4s 7d 7s 9s Tc Th Qs Kd Kh` |
+| `KTs` | 1.8% | 3 | 0.558144 | 0.421758 | 4 | 0.168027 | 0.245437 | `3d 5d 9c 9h Td Js Qh Kh Ks Ad` | `4c 4h 5s 8h 9s Ts Qd Kd Kh Ks` |
+| `KJo` | 3.6% | 3 | -0.131725 | -0.142471 | 4 | -0.671450 | -0.422610 | `3c 5c 5h 6c 8s 9s Qd Kd Kh Ks` | `2s 4c 5d 9s Jh Js Qs Kd Ks Ac` |
+| `KJs` | 1.9% | 3 | 0.500477 | 0.380443 | 4 | -0.083599 | 0.044977 | `2c 3d 5d 9d 9h 9s Jh Kd Ks Ah` | `4h 6d 6s 7h Tc Td Jd Js Kd Ks` |
+| `KQo` | 4.0% | 3 | -0.103143 | -0.121816 | 4 | -0.711398 | -0.441801 | `3d 3s 7s 8c 8h 9s Jc Qc Kd Kh` | `3c 5h 8c Th Ts Qc Qs Kd Ks Ad` |
+| `KQs` | 1.3% | 3 | 0.570888 | 0.422791 | 4 | 0.044424 | 0.155285 | `6c 6d 8c Td Qs Kd Kh Ac Ad As` | `3h 3s 5c 6s 8h Tc Qd Qh Qs Kh` |
+| `QTo` | 16.0% | 2 | 0.029543 | -0.011416 | 3 | -0.446105 | -0.260510 | `3s 4d 4h 5c 5h 8c 8h 9d Th Qs` | `4c 4h 5d 5h 8d 9h Tc Qh Qs Kh` |
+| `QTs` | 6.7% | 2 | 0.671288 | 0.506785 | 3 | 0.258685 | 0.306984 | `2c 2h 3c 3s 8d Ts Qd Kd Ks As` | `3c 4h 7c 7d 9s Td Th Ts Ks As` |
+| `QJo` | 11.1% | 2 | 0.104908 | 0.030515 | 3 | -0.393839 | -0.221491 | `7d 8s 9d Th Jc Qs Kc Kh Ac Ad` | `4h 6c 8d 8h 9c Jc Jh Qs Ac Ah` |
+| `QJs` | 7.2% | 2 | 0.721636 | 0.536434 | 3 | 0.262144 | 0.312929 | `2s 4c 5c 7d 9s Js Qd Ac Ad As` | `3s 4c 8c 8h 9d Jd Jh Qs Kd As` |
+| `JTo` | 34.9% | 1 | 0.278601 | 0.163404 | 2 | -0.166970 | -0.068374 | `2c 2d 2s 6d 6h 9d Ts Qh Ks Ac` | `3s 7s 8s 9c Th Ts Qd Kc Ac Ah` |
+| `JTs` | 18.8% | 2 | 0.488300 | 0.461211 | 3 | 0.010837 | 0.231246 | `2s 3d 3h 3s 5c 7c 7d Td Js Ks` | `3h 4s 6s 9c Th Jd Js Qc Kc Ah` |
+| `T9o` | 72.1% | 0 | 0.293424 | 0.191212 | 1 | -0.117040 | -0.023180 | `2h 2s 4h 5s 7c 8c 8s Qh Kc Ah` | `2s 3s 5d 7c 7d 8h 9c Jh Ks Ah` |
+| `T9s` | 50.4% | 1 | 0.285149 | 0.256847 | 2 | -0.141430 | 0.050422 | `2c 4s 5d 8s 9d Qc Qs Kc Ac As` | `2d 2s 4c 4d 5s 7d 7s Td Th Js` |
+
 ## Suited Qx Examples
 
 | Hand | Check% | Avg EV(4x) | Avg EV(check) | Exact threshold | Rough threshold | Representative threshold sample |
