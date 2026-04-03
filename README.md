@@ -19,6 +19,8 @@ This repo is aimed at questions like:
   Exact C solver for one fixed hero hand plus one fixed exposed-card set.
 - `sample_random_exposed_ev.py`
   Batch runner that samples many random exposed-card sets and calls the C solver for each one.
+- `analyze_dead_out_thresholds.py`
+  Post-processes the published per-hand sample CSVs into "how many dead-card outs make `check` beat `4x`?" tables.
 
 ## What The Solver Computes
 
@@ -582,6 +584,8 @@ This repo now includes one completed `1000`-sample family run for the hand set a
 
 - `results/edge_family_sampling_84x1000/summary.csv`
 - `results/edge_family_sampling_84x1000/switch_gain_dollars.csv`
+- `results/edge_family_sampling_84x1000/outs_threshold_summary.csv`
+- `results/edge_family_sampling_84x1000/outs_bucket_summary.csv`
 
 The helper script:
 
@@ -640,6 +644,70 @@ Family totals in the published run:
 - `Tx explicit (T8/T9)`: `$0.720004`
 - `Ax`: `$0.487609`
 - `22`-`55`: `$0.482000`
+
+## Dead-Card Outs Thresholds
+
+The published run also includes an outs-based view of the same `84 x 1000` samples.
+
+Here, **outs** means:
+
+- every exposed/dead card whose rank matches either hero rank
+- for `KQo`, a dead `K` or dead `Q` counts as one out
+- for `33`, a dead `3` counts as one out
+
+The helper script:
+
+```bash
+python3 analyze_dead_out_thresholds.py
+```
+
+builds two published tables:
+
+- `results/edge_family_sampling_84x1000/outs_threshold_summary.csv`
+- `results/edge_family_sampling_84x1000/outs_bucket_summary.csv`
+
+### How To Read The Tables
+
+`outs_bucket_summary.csv` is the raw per-hand, per-outs table. For each exact outs count it reports:
+
+- samples in that bucket
+- average `EV(4x)`
+- average `EV(check)`
+- average `Best EV`
+- `check_better_rate`
+- which action has the higher average EV in that exact bucket
+
+`outs_threshold_summary.csv` is the compact "roughly how many outs?" view. It reports two switch points:
+
+- `first_exact_outs_where_avg_check_exceeds_4x`
+  - the first exact outs bucket where average `EV(check)` beats average `EV(4x)`
+- `rough_threshold_outs_pooled`
+  - the smallest outs count `t` such that, after pooling all samples with `outs >= t`, average `EV(check)` beats average `EV(4x)`
+
+The first number is the cleaner exact-bucket crossover. The pooled number is often a better "rule of thumb" threshold when the high-outs buckets are small and noisy.
+
+If the rough threshold is `0`, `check` already beats `4x` on average across the full published sample set for that hand. If the threshold fields are blank, then even at the highest observed outs counts the published `1000` samples never made average `EV(check)` exceed average `EV(4x)`.
+
+### Representative Thresholds
+
+| Hand | Exact bucket where `check` first beats `4x` | Avg `EV(4x)` there | Avg `EV(check)` there | Rough pooled threshold | Pooled avg `EV(4x)` | Pooled avg `EV(check)` |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `33` | `1` | `-0.455857` | `-0.346497` | `1` | `-0.553947` | `-0.402851` |
+| `A2o` | `3` | `-0.606421` | `-0.450688` | `2` | `-0.339925` | `-0.300856` |
+| `A2s` | `3` | `-0.144912` | `-0.140712` | `3` | `-0.193119` | `-0.164967` |
+| `KQo` | `4` | `-0.711398` | `-0.441801` | `3` | `-0.178097` | `-0.160984` |
+| `JTo` | `2` | `-0.166970` | `-0.068374` | `1` | `0.008836` | `0.025773` |
+| `T9s` | `2` | `-0.141430` | `0.050422` | `0` | `0.180101` | `0.211384` |
+| `Q2o` | `0` | `-0.264635` | `-0.173940` | `0` | `-0.789214` | `-0.454802` |
+| `A6s` | none | — | — | none | — | — |
+
+Interpretation:
+
+- `33` flips quickly: once one of the two remaining `3`s is dead, `check` already beats `4x` on the exact-bucket average.
+- `A2o` is more gradual: the exact buckets switch at `3` outs, but pooling all `2+`-outs samples already favors `check`.
+- `KQo` is still resilient: it takes heavy damage to the `K/Q` ranks before `check` beats `4x` on average.
+- `Q2o` is already a `check` on average with `0` outs, so its threshold is `0`.
+- `A6s` and `A7s` never crossed in this `1000`-sample run, even in their highest observed outs buckets.
 
 ## Rare-Action Examples
 
