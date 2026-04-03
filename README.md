@@ -714,6 +714,33 @@ Interpretation:
 - `Q2o` is already a `check` on average with `0` outs, so its threshold is `0`.
 - `A6s` and `A7s` never crossed in this `1000`-sample run, even in their highest observed outs buckets.
 
+### Quick Examples
+
+- `33`
+  - `0` dead `3`s: average `EV(4x)=0.456751`, average `EV(check)=0.254931`
+  - `1` dead `3`: average `EV(4x)=-0.455857`, average `EV(check)=-0.346497`
+  - practical read: pocket 3s flips fast once one set out is dead
+- `A2o`
+  - `1` out: average `EV(4x)=0.108721`, average `EV(check)=-0.041494`
+  - `2` outs: average `EV(4x)=-0.237463`, average `EV(check)=-0.243518`
+  - `3` outs: average `EV(4x)=-0.606421`, average `EV(check)=-0.450688`
+  - practical read: still basically a `4x` at `2` outs, but by `3` outs `check` has pulled ahead
+- `KQo`
+  - `2` outs: average `EV(4x)=0.418349`, average `EV(check)=0.159202`
+  - `3` outs: average `EV(4x)=-0.103143`, average `EV(check)=-0.121816`
+  - `4` outs: average `EV(4x)=-0.711398`, average `EV(check)=-0.441801`
+  - practical read: broadway strength carries it for a while, but heavy K/Q damage eventually makes `check` better
+- `JTo`
+  - `1` out: average `EV(4x)=0.278601`, average `EV(check)=0.163404`
+  - `2` outs: average `EV(4x)=-0.166970`, average `EV(check)=-0.068374`
+  - practical read: one dead `J/T` still leaves `4x` ahead, but two dead shared ranks are enough to flip it
+- `Q2o`
+  - `0` outs: average `EV(4x)=-0.264635`, average `EV(check)=-0.173940`
+  - practical read: this hand is already a `check` on average even before any shared-rank dead cards show up
+- `A6s`
+  - `4` outs: average `EV(4x)=-0.111955`, average `EV(check)=-0.149202`
+  - practical read: in this sample set, even the highest observed shared-rank damage did not make average `check` beat average `4x`
+
 ## Rare-Action Examples
 
 The tables below answer a practical question:
