@@ -665,6 +665,11 @@ builds two published tables:
 
 - `results/edge_family_sampling_84x1000/outs_threshold_summary.csv`
 - `results/edge_family_sampling_84x1000/outs_bucket_summary.csv`
+- `results/edge_family_sampling_84x1000/outs_threshold_summary.md`
+
+If you want the full hand-by-hand table rendered directly on GitHub instead of opening the CSVs, use:
+
+- `results/edge_family_sampling_84x1000/outs_threshold_summary.md`
 
 ### How To Read The Tables
 
